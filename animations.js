@@ -226,8 +226,8 @@
             delay: 0.5
         });
 
-        // Barrier section
-        gsap.from('.barrier-content', {
+        // Gateway section
+        gsap.from('.gateway-content', {
             duration: 1,
             opacity: 0,
             y: 40,

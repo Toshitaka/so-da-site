@@ -1,7 +1,7 @@
 /**
- * CAIL Particle System (Optimized)
+ * CAIL Particle System (Ultra-Optimized for Mobile)
  * Floating neon particles with mouse interaction
- * Performance optimized for mobile devices
+ * Performance optimized for smooth scrolling on mobile devices
  */
 
 (function () {
@@ -14,11 +14,15 @@
     let mouse = { x: null, y: null, radius: 150 };
     let animationId;
     let lastTime = 0;
-    const targetFPS = 30; // Reduce to 30fps for performance
-    const frameInterval = 1000 / targetFPS;
+    let isScrolling = false;
+    let scrollTimeout;
 
     // Detect mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+    // Mobile: 20fps, Desktop: 30fps
+    const targetFPS = isMobile ? 20 : 30;
+    const frameInterval = 1000 / targetFPS;
 
     // Colors
     const colors = [
@@ -78,12 +82,12 @@
         }
     }
 
-    // Initialize particles (reduced count for mobile)
+    // Initialize particles (ultra-reduced count for mobile)
     function initParticles() {
         particles = [];
-        // Mobile: max 25, Tablet: max 50, Desktop: max 80
-        const maxCount = isMobile ? 25 : (width < 1024 ? 50 : 80);
-        const count = Math.min(Math.floor((width * height) / 20000), maxCount);
+        // Mobile: max 15, Tablet: max 40, Desktop: max 70
+        const maxCount = isMobile ? 15 : (width < 1024 ? 40 : 70);
+        const count = Math.min(Math.floor((width * height) / 25000), maxCount);
         for (let i = 0; i < count; i++) {
             particles.push(new Particle());
         }
@@ -124,6 +128,9 @@
     function animate(currentTime) {
         animationId = requestAnimationFrame(animate);
 
+        // Skip updates during scroll on mobile for smooth scrolling
+        if (isScrolling && isMobile) return;
+
         const delta = currentTime - lastTime;
         if (delta < frameInterval) return;
         lastTime = currentTime - (delta % frameInterval);
@@ -140,6 +147,17 @@
 
     // Event listeners
     window.addEventListener('resize', resize, { passive: true });
+
+    // Scroll detection - pause animation during scroll on mobile for smooth scrolling
+    if (isMobile) {
+        window.addEventListener('scroll', () => {
+            isScrolling = true;
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+            }, 150);
+        }, { passive: true });
+    }
 
     // Mouse interaction (desktop only)
     if (!isMobile) {
